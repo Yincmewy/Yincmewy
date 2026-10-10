@@ -1,0 +1,43 @@
+name: Update contribution snake
+
+on:
+  schedule:
+    - cron: "17 1 * * *" # Daily at 09:17 Asia/Shanghai.
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - README.md
+      - .github/workflows/snake.yml
+
+permissions: {}
+
+concurrency:
+  group: contribution-snake
+  cancel-in-progress: false
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - name: Generate contribution snake
+        uses: Platane/snk/svg-only@d8f6715049803e982ee5ff501b6b9b7d5deeb09b # v3
+        with:
+          github_user_name: Yincmewy
+          outputs: |
+            dist/github-contribution-grid-snake.svg?color_snake=%238b5cf6
+            dist/github-contribution-grid-snake-dark.svg?palette=github-dark&color_snake=%23a78bfa
+
+      - name: Publish SVGs to output branch
+        uses: crazy-max/ghaction-github-pages@1d6ee9b181a81033a16bd707a1401afa978daab4 # v5.0.0
+        with:
+          target_branch: output
+          build_dir: dist
+          keep_history: true
+          allow_empty_commit: false
+          commit_message: "chore: update contribution snake"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
